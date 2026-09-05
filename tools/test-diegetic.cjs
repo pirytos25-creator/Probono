@@ -1,0 +1,38 @@
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+(async()=>{
+ const browser=await chromium.launch({headless:true,channel:process.env.TEST_BROWSER_CHANNEL||undefined});
+ const page=await browser.newPage({viewport:{width:1280,height:720}});const errors=[];
+ page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text())});
+ await page.goto(process.env.TEST_URL||'http://127.0.0.1:4187/');
+ assert.equal(await page.locator('#welcome').isVisible(),false);
+ await page.screenshot({path:'assets/test-world-start.png'});
+ await page.evaluate(()=>document.querySelectorAll('video').forEach(v=>v.playbackRate=8));
+ const wait=async state=>{await page.waitForFunction(s=>document.querySelector('#experience').dataset.state===s,state);assert.equal(await page.locator('#world-action').isVisible(),true);};
+ await page.click('#world-action');await wait('waypoint');
+ const time=await page.locator('#approach').evaluate(v=>v.currentTime);await page.waitForTimeout(350);assert.equal(await page.locator('#approach').evaluate(v=>v.currentTime),time);
+ await page.screenshot({path:'assets/test-world-waypoint.png'});
+ await page.click('#world-action');await wait('reach');
+ await page.click('#world-action');await wait('held');
+ await page.screenshot({path:'assets/test-world-held.png'});
+ await page.click('#world-action');await wait('opened');
+ await page.screenshot({path:'assets/test-world-opened.png'});
+ await page.click('#world-action');await wait('letter-held');
+ await page.screenshot({path:'assets/test-world-letter-held.png'});
+ await page.click('#world-action');await page.waitForFunction(()=>document.querySelector('#experience').dataset.state==='inspect');
+ await page.mouse.move(640,340);await page.mouse.down();await page.mouse.move(770,380,{steps:8});await page.mouse.up();
+ await page.mouse.wheel(0,-200);assert.ok(await page.evaluate(()=>zoom)>1);
+ await page.keyboard.press('r');assert.equal(await page.evaluate(()=>zoom),1);
+ await page.screenshot({path:'assets/test-world-inspect.png'});
+ await page.keyboard.press('Escape');assert.equal(await page.locator('#pause-menu').evaluate(e=>e.open),true);
+ await page.click('#restart-game');assert.equal(await page.locator('#experience').getAttribute('data-state'),'welcome');
+ await page.setViewportSize({width:390,height:844});
+ await page.evaluate(()=>document.querySelectorAll('video').forEach(v=>v.playbackRate=8));
+ await page.click('#world-action');await wait('waypoint');await page.click('#world-action');await wait('reach');await page.click('#world-action');await wait('held');
+ // Drag the filmed envelope into interactive inspection; opening must remain available.
+ await page.mouse.move(190,350);await page.mouse.down();await page.mouse.move(240,390,{steps:8});await page.mouse.up();
+ assert.equal(await page.locator('#experience').evaluate(e=>e.classList.contains('live-object')),true);
+ await page.evaluate(()=>advance());await wait('opened');await page.click('#world-action');await wait('letter-held');await page.click('#world-action');
+ await page.screenshot({path:'assets/test-world-mobile.png'});
+ assert.deepEqual(errors,[]);console.log('PASS: world-only UI, click-driven approach/pickup/open/extract, held frames, rotation, zoom, pause, restart, mobile, no browser errors.');await browser.close();
+})();

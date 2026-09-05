@@ -1,0 +1,5 @@
+tools/
+assets/test-*.png
+assets/reference-*.jpg
+assets/end-2.jpg
+*.zip

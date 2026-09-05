@@ -1,0 +1,23 @@
+/* The world itself is the interface. Controls appear only in the pause menu. */
+#experience header,#welcome,#guide,#actions,#experience footer,#skip,#hotspot,#video-progress,#help-dialog,#transcript{display:none!important}
+#experience{min-height:0}
+#experience[data-state=welcome] #approach{filter:none}
+#experience .vignette{background:radial-gradient(ellipse at center,transparent 45%,#0005 100%)}
+#approach,#opening{transition:opacity .3s;filter:none}
+#opening{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;z-index:1}
+#still{display:none}
+#world-action{position:absolute;z-index:6;display:block;background:transparent;border:0;padding:0;cursor:none;touch-action:none;outline-offset:-5px}
+#world-action:focus-visible{outline:1px solid #d1b88455}
+#world-cursor{position:fixed;z-index:12;width:5px;height:5px;border-radius:50%;background:#fff8;box-shadow:0 1px 5px #0009;pointer-events:none;transform:translate(-50%,-50%);transition:width .15s,height .15s,border .15s,background .15s;opacity:0}
+#experience:hover #world-cursor{opacity:1}
+#world-cursor.over{width:22px;height:22px;background:#fff1;border:1px solid #ead5a7b0}
+#experience.moving #world-cursor{opacity:0}
+#scene{pointer-events:none;opacity:0!important;transition:opacity .35s}
+#inspection-backdrop{opacity:0!important;background:linear-gradient(#0003,#0004),url('assets/environment.jpg') center/cover;filter:blur(3px);transform:scale(1.025);transition:opacity .35s}
+#experience.live-object #scene{opacity:1!important;pointer-events:auto}
+#experience.live-object #inspection-backdrop{opacity:1!important}
+#scene canvas{cursor:grab}
+#pause-menu{line-height:1.8}
+#pause-menu>p{color:#bdb8a9;font-size:13px}
+#pause-menu .pause-tip{font-size:11px;margin-top:22px}
+@media(pointer:coarse){#world-cursor{display:none}}
